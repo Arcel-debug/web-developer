@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcel Bularon - Test JSON</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            padding: 20px 0;
+        }
+        button:disabled {
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div id="accordion">
+            <!-- Accordion items will be dynamically inserted here -->
+        </div>
+    </div>
+    <div class="footer">
+        <button id="refreshButton" class="btn btn-primary" disabled>Refresh</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript">
+        const accordionElement = document.getElementById('accordion');
+        const refreshButton = document.getElementById('refreshButton');
+
+        document.addEventListener('DOMContentLoaded', function () {
+            fetchData();
+            countdown(5);
+        });
+
+        refreshButton.addEventListener('click', function () {
+            fetchData();
+            countdown(5);
+        });
+
+        function fetchData() {
+            fetch('https://coauth.com/test.json')
+                .then(response => response.json())
+                .then(data => {
+                    createAccordion(data);
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        function createAccordion(data) {
+            accordionElement.innerHTML = ''; // Clear existing accordion content
+            Object.keys(data).forEach((key, index) => {
+                const itemHtml = `
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading${index}">
+                            <button class="accordion-button ${index !== 0 ? 'collapsed' : ''}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${index}" aria-expanded="${index === 0}" aria-controls="collapse${index}">
+                                ${key}
+                            </button>
+                        </h2>
+                        <div id="collapse${index}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}" aria-labelledby="heading${index}" data-bs-parent="#accordion">
+                            <div class="accordion-body">
+                                ${data[key]}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                accordionElement.insertAdjacentHTML('beforeend', itemHtml);
+            });
+        }
+
+        function countdown(seconds) {
+            let counter = seconds;
+            refreshButton.textContent = `${counter} seconds`;
+            refreshButton.disabled = true;
+
+            const intervalId = setInterval(() => {
+                counter--;  // Decrement the counter
+                if (counter > 0) {
+                    refreshButton.textContent = `${counter} seconds`;
+                } else {
+                    clearInterval(intervalId);
+                    refreshButton.textContent = 'Refresh';  // Reset button text
+                    refreshButton.disabled = false;  // Enable the button
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
